@@ -22,7 +22,7 @@ onInstall:
     - installJenkinsPlugins
     - setupMaster
   - if (settings.cloned == 'true'): cleanupNodes
-  - if (settings.cloned == 'true'): resetJenkinsPassword
+  - resetJenkinsPassword
   - readPublicKeyFromMaster
   - set:
       key: ${response.body}
@@ -82,7 +82,6 @@ actions:
      - cmd[cp]: |-
          pswd=$(cat ~/.jenkins/secrets/initialAdminPassword)
          jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
-         wget -O $jar http://localhost:8080/jnlpJars/jenkins-cli.jar
          cmd="java -jar $jar -auth admin:$pswd -s http://localhost:8080/"
          until $(echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("${settings.user}", "${globals.password}")' | $cmd groovy =); do echo "repeat..."; sleep 2; done
          sudo service tomcat restart;
@@ -99,7 +98,10 @@ actions:
       sleep 60s
       while [[ $(curl -s -w "%{http_code}" http://localhost:8080/ -o /dev/null) != "403" ]]; do echo "."; sleep 1; done
       jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
-      wget -O $jar http://localhost:8080/jnlpJars/jenkins-cli.jar
+      wget -O /tmp/jenkins-cli.jar http://localhost:8080/jnlpJars/jenkins-cli.jar
+      filesize=$(ls -lh /tmp/jenkins-cli.jar | awk '{print  $5}')
+      if [ $filesize == "0" ]; then echo "unable to fetch jenkins cli"; else mv /tmp/jenkins-cli.jar $jar; fi
+
 
    installJenkinsPlugins:
     cmd[cp]: |-
@@ -108,7 +110,7 @@ actions:
       jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
       cmd="java -Xmx100M -jar $jar -auth admin:$pswd -s http://localhost:8080/"
       printf "<?xml version='1.1' encoding='UTF-8'?>\n<jenkins.model.JenkinsLocationConfiguration>\n\t<adminAddress>${user.email}</adminAddress>\n\t<jenkinsUrl>${env.protocol}://${env.domain}/</jenkinsUrl>\n</jenkins.model.JenkinsLocationConfiguration>" > ~/.jenkins/jenkins.model.JenkinsLocationConfiguration.xml
-      wget ${baseUrl}/conf/required-plugins.txt -O plugins.txt
+      wget ${baseUrl}/conf/plugins.txt -O plugins.txt
       while read p; do names="${p%% *} $names"; done < plugins.txt
       $cmd install-plugin $names
 
@@ -141,6 +143,11 @@ actions:
         cat /etc/ssh/ssh_host_rsa_key.pub
         echo "/home/jelastic/.ssh/authorized_keys" >> /etc/jelastic/redeploy.conf
         echo "/etc/ssh/" >> /etc/jelastic/redeploy.conf
+        jvm_ver=$(java -version 2>&1 | cut -s -d '"' -f2)
+        echo "export JAVA_PATH=/usr/bin/java" >> /home/jelastic/.bashrc
+        echo "export JAVA_PATH=/usr/bin/java" >> /etc/.bashrc
+        echo "export JAVA_VERSION=${jvm_ver}" >> /home/jelastic/.bashrc
+        echo "export JAVA_VERSION=${jvm_ver}" >> /etc/.bashrc
     - cmd[${nodes.cp.master.id}]: |-
         ssh-keygen -R ${this.slaveNodeIp}
         echo ${this.slaveNodeIp} ${response.out} >> ~/.ssh/known_hosts
