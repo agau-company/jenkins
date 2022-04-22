@@ -80,6 +80,7 @@ actions:
          user: ${settings.user}
          password: ${fn.password}
      - cmd[cp]: |-
+         sleep 60
          while [[ $(curl -s -w "%{http_code}" http://localhost:8080/ -o /dev/null) != "403" ]]; do echo "."; sleep 5; done
          pswd=$(cat ~/.jenkins/secrets/initialAdminPassword)
          jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
@@ -124,6 +125,7 @@ actions:
       sed -i 's/<numExecutors>[0-9]*<\/numExecutors>/<numExecutors>0<\/numExecutors>/g' ~/.jenkins/config.xml;
       curl -o .jenkins/hudson.tasks.Maven.xml ${baseUrl}/conf/hudson.tasks.Maven.xml
       sudo service tomcat restart
+      sleep 60
       while [[ $(curl -s -w "%{http_code}" http://localhost:8080/ -o /dev/null) != "403" ]]; do echo "."; sleep 2; done
       echo -e "\n"|ssh-keygen -t rsa -N ""
       wget ${baseUrl}/conf/credentials.xml -O credentials.xml
