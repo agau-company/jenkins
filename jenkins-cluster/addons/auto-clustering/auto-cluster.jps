@@ -144,11 +144,6 @@ actions:
         cat /etc/ssh/ssh_host_rsa_key.pub
         echo "/home/jelastic/.ssh/authorized_keys" >> /etc/jelastic/redeploy.conf
         echo "/etc/ssh/" >> /etc/jelastic/redeploy.conf
-        jvm_ver=$(java -version 2>&1 | cut -s -d '"' -f2)
-        echo "export JAVA_PATH=/usr/bin/java" >> /home/jelastic/.bashrc
-        echo "export JAVA_PATH=/usr/bin/java" >> /etc/.bashrc
-        echo "export JAVA_VERSION=${jvm_ver}" >> /home/jelastic/.bashrc
-        echo "export JAVA_VERSION=${jvm_ver}" >> /etc/.bashrc
     - cmd[${nodes.cp.master.id}]: |-
         ssh-keygen -R ${this.slaveNodeIp}
         echo ${this.slaveNodeIp} ${response.out} >> ~/.ssh/known_hosts
