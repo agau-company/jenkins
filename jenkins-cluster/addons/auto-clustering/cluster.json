@@ -1,6 +1,6 @@
 {
   "convertable": false,
-  "jps": "https://raw.githubusercontent.com/rohit-agau/jcs/master/jenkins-cluster/addons/auto-clustering/auto-cluster.jps",
+  "jps": "https://raw.githubusercontent.com/agau-company/jenkins/master/jenkins-cluster/addons/auto-clustering/auto-cluster.jps",
   "defaultState": true,
   "required": true,
   "compatibleAddons": [
@@ -36,6 +36,9 @@
     "isDeploySupport": false,
     "isClusterDependency": true,
     "scalingMode": "STATELESS",
-    "applyQuotas": true
+    "applyQuotas": true,
+    "compatibleAddons": [
+      "jenkins-auto-cluster"
+    ]
   }
 }
