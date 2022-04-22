@@ -15,7 +15,7 @@ if [[ "$_java" ]]; then
     version=$("$_java" -version 2>&1 | awk -F '"' '/version/ {print $2}')
     echo version "$version"
     if [[ "$version" != "0" ]]; then
-        echo "export JAVA_VERSION=$version" >> ~/./bashrc
+        echo "export JAVA_VERSION=$version" >> ~/.bashrc
     else         
         echo "no java"
     fi
