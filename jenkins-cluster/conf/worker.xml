@@ -9,6 +9,7 @@
     <host>THEREMUSTBETHESLAVEHOST</host>
     <port>22</port>
     <credentialsId>worker</credentialsId>
+    <javaPath>/usr/bin/java</javaPath>
   </launcher>
   <label>THEREMUSTBETHENODEID</label>
   <nodeProperties/>
