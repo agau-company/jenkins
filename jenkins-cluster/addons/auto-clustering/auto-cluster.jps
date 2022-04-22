@@ -95,12 +95,11 @@ actions:
 
    setupJenkinsCLI:
     cmd[cp]: |-
-      sleep 60s
       while [[ $(curl -s -w "%{http_code}" http://localhost:8080/ -o /dev/null) != "403" ]]; do echo "."; sleep 1; done
       jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
       wget -O /tmp/jenkins-cli.jar http://localhost:8080/jnlpJars/jenkins-cli.jar
       filesize=$(ls -lh /tmp/jenkins-cli.jar | awk '{print  $5}')
-      if [ $filesize == "0" ]; then echo "unable to fetch jenkins cli"; else mv /tmp/jenkins-cli.jar $jar; fi
+      if [ $filesize == "0" ]; then echo "unable to fetch jenkins cli"; exit 1; else mv /tmp/jenkins-cli.jar $jar; fi
 
 
    installJenkinsPlugins:
