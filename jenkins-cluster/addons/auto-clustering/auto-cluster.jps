@@ -152,8 +152,12 @@ actions:
         echo "/etc/ssh/" >> /etc/jelastic/redeploy.conf
     - cmd[${nodes.cp.master.id}]: |-
         ssh-keygen -R ${this.slaveNodeIp}
+        mkdir -p /home/jelastic/.ssh
+        mkdir -p /opt/tomcat/temp/.ssh
         touch /home/jelastic/.ssh/known_hosts
+        touch /opt/tomcat/temp/.ssh/known_hosts
         echo ${this.slaveNodeIp} ${response.out} >> /home/jelastic/.ssh/known_hosts
+        echo ${this.slaveNodeIp} ${response.out} >> /opt/tomcat/temp/.ssh/known_hosts
         pswd=$(cat ~/.jenkins/secrets/initialAdminPassword)
         jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
         wget ${baseUrl}/conf/worker.xml -O worker.xml
