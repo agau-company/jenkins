@@ -80,11 +80,13 @@ actions:
          user: ${settings.user}
          password: ${fn.password}
      - cmd[cp]: |-
-         sleep 60
+         sleep 120
          while [[ $(curl -s -w "%{http_code}" http://localhost:8080/ -o /dev/null) != "403" ]]; do echo "."; sleep 5; done
          pswd=$(cat ~/.jenkins/secrets/initialAdminPassword)
          jar=${STACK_PATH}/webapps/ROOT/WEB-INF/lib/jenkins-cli.jar
          cmd="java -jar $jar -auth admin:$pswd -s http://localhost:8080/"
+         until $(echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("${settings.user}", "${globals.password}")' | $cmd groovy =); do echo "repeat..."; sleep 2; done
+         until $(echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("${settings.user}", "${globals.password}")' | $cmd groovy =); do echo "repeat..."; sleep 2; done
          until $(echo 'jenkins.model.Jenkins.instance.securityRealm.createAccount("${settings.user}", "${globals.password}")' | $cmd groovy =); do echo "repeat..."; sleep 2; done
          sudo service tomcat restart;
      - api: message.email.Send
@@ -141,6 +143,7 @@ actions:
    initSlave:
     - cmd[${this.slaveNodeId}]: |-
         yum -y install gettext
+        echo "export JAVA_VERSION=11.0.14" >> /home/jelastic/.bashrc
       user: root
     - cmd[${this.slaveNodeId}]: |-
         echo "${this.publicKey}" >> /home/jelastic/.ssh/authorized_keys;
@@ -157,9 +160,6 @@ actions:
         xmlstarlet ed --inplace -u "slave/launcher/host" -v "${this.slaveNodeIp}" worker.xml 2>/dev/null;
         xmlstarlet ed --inplace -u "slave/label" -v "node${this.slaveNodeId}" worker.xml 2>/dev/null;
         cat worker.xml | java -jar $jar -s http://localhost -auth admin:$pswd create-node node${this.slaveNodeId}
-        wget ${baseUrl}/conf/java-checker.sh -O java-checker.sh
-        sh java-checker.sh
-        echo "export JAVA_VERSION=11.0.14" >> /home/jelastic/.bashrc
         rm -f worker.xml
    
    removeSlave:
